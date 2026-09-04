@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AOSPSounds - Authentic Stock Android Audio Archive</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --card-bg: #ffffff;
+            --card-border: #dee2e6;
+            --primary: #1a73e8;
+            --header-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0,0,0,0.05);
+            --subtitle-color: #5f6368;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --card-border: #333333;
+            --primary: #8ab4f8;
+            --header-bg: #1e1e1e;
+            --shadow: 0 4px 6px rgba(0,0,0,0.3);
+            --subtitle-color: #9aa0a6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .settings-btn, .upload-btn {
+            background: none;
+            border: 1px solid var(--card-border);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .settings-btn:hover, .upload-btn:hover {
+            border-color: var(--primary);
+            background-color: rgba(26, 115, 232, 0.04);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        .hero-section {
+            margin-bottom: 2rem;
+            text-align: left;
+        }
+
+        .hero-section h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            color: var(--text-color);
+        }
+
+        .hero-section p {
+            font-size: 1rem;
+            color: var(--subtitle-color);
+            line-height: 1.5;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--card-border);
+            padding-bottom: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .tab {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.6rem 1.2rem;
+            opacity: 0.6;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            opacity: 0.9;
+            background-color: var(--card-border);
+        }
+
+        .tab.active {
+            opacity: 1;
+            background-color: var(--primary);
+            color: #fff;
+        }
+
+        .sound-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .sound-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 1.1rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .sound-title {
+            font-size: 0.95rem;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            flex: 1;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.55rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            text-decoration: none;
+        }
+
+        .action-btn.download {
+            background-color: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-color);
+        }
+
+        .action-btn:hover {
+            opacity: 0.85;
+        }
+
+        .action-btn.download:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: rgba(26, 115, 232, 0.04);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 320px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            border: 1px solid var(--card-border);
+        }
+
+        .modal-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .setting-group label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            font-weight: 500;
+        }
+
+        .setting-group select {
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--card-border);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .setting-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .close-modal {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        #audio-file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">AOSPSounds</div>
+        <div class="header-right">
+            <input type="file" id="audio-file-input" accept="audio/*">
+            <button class="upload-btn" id="upload-btn" onclick="document.getElementById('audio-file-input').click()">📤 Upload</button>
+            <button class="settings-btn" id="settings-trigger">⚙️ Settings</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="hero-section">
+            <h1>Android Open Source Project Sounds</h1>
+            <p>This archive is entirely filled with authentic, stock AOSPSounds including ringtones, notifications, alarms, and system UI effects.</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-target="alarms">Alarms</button>
+            <button class="tab" data-target="notifications">Notifications</button>
+            <button class="tab" data-target="ringtones">Ringtones</button>
+            <button class="tab" data-target="ui">UI</button>
+        </div>
+
+        <div id="sound-container" class="sound-grid"></div>
+    </div>
+
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">Settings</div>
+            
+            <div class="setting-group">
+                <label>Theme</label>
+                <select id="theme-select">
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+
+            <button class="close-modal" id="close-modal-btn">Done</button>
+        </div>
+    </div>
+
+    <script>
+        const soundsData = {
+            alarms: [
+                "Alarm_Beep_01.ogg", "Alarm_Beep_02.ogg", "Alarm_Beep_03.ogg", "Alarm_Buzzer.ogg", 
+                "Alarm_Rooster_02.ogg", "Argon.ogg", "Barium.ogg", "Carbon.ogg", "CyanAlarm.ogg", 
+                "Hassium.ogg", "Krypton.ogg", "Neon.ogg", "NuclearLaunch.ogg", "Osmium.ogg", 
+                "Platinum.ogg", "Scandium.ogg", "Timer.ogg"
+            ],
+            notifications: [
+                "Aldebaran.ogg", "Altair.ogg", "Alya.ogg", "Antares.ogg", "Antimony.ogg", "Arcturus.ogg", 
+                "Argon.ogg", "Ariel.ogg", "Beat_Box_Android.ogg", "Bellatrix.ogg", "Beryllium.ogg", 
+                "Betelgeuse.ogg", "CaffeineSnake.ogg", "Canopus.ogg", "Capella.ogg", "Carme.ogg", 
+                "Castor.ogg", "Ceres.ogg", "CetiAlpha.ogg", "Cobalt.ogg", "Cricket.ogg", "CyanDoink.ogg", 
+                "CyanMail.ogg", "CyanMessage.ogg", "DearDeer.ogg", "Deneb.ogg", "Doink.ogg", 
+                "DontPanic.ogg", "Drip.ogg", "Elara.ogg", "Electra.ogg", "Europa.ogg", "F1_New_SMS.ogg", 
+                "Fluorine.ogg", "Fomalhaut.ogg", "Gallium.ogg", "Heaven.ogg", "Helium.ogg", 
+                "Highwire.ogg", "Hojus.ogg", "Iapetus.ogg", "Io.ogg", "Iridium.ogg", "Krypton.ogg", 
+                "KzurbSonar.ogg", "Laser.ogg", "Merope.ogg", "Mira.ogg", "Moonbeam.ogg", "Naughty.ogg", 
+                "OnTheHunt.ogg", "Palladium.ogg", "Pixiedust.ogg", "Pizzicato.ogg", "Plastic_Pipe.ogg", 
+                "Polaris.ogg", "Pollux.ogg", "Pong.ogg", "Procyon.ogg", "Proxima.ogg", "Radon.ogg", 
+                "Rang.ogg", "Regulus.ogg", "Rhea.ogg", "Rubidium.ogg", "Salacia.ogg", "Selenium.ogg", 
+                "Shaula.ogg", "Sirius.ogg", "Sirrah.ogg", "Spica.ogg", "Stone.ogg", "Strontium.ogg", 
+                "Syrma.ogg", "TaDa.ogg", "Talitha.ogg", "Tethys.ogg", "Thallium.ogg", "Titan.ogg", 
+                "Tweeters.ogg", "Upsilon.ogg", "Vega.ogg", "Voila.ogg", "Xenon.ogg", "Zirconium.ogg"
+            ],
+            ringtones: [
+                "Andromeda.ogg", "Aquila.ogg", "ArgonNavis.ogg", "Backroad.ogg", "BeatPlucker.ogg", 
+                "BentleyDubs.ogg", "Big_Easy.ogg", "BirdLoop.ogg", "Bollywood.ogg", "BOOTES.ogg", 
+                "Boxbeat.ogg", "BussaMove.ogg", "Cairo.ogg", "Callisto.ogg", "Calypso_Steel.ogg", 
+                "CanisMajor.ogg", "CaribbeanIce.ogg", "Carina.ogg", "CASSIOPEIA.ogg", "Centaurus.ogg", 
+                "Champagne_Edition.ogg", "Club_Cubano.ogg", "CrayonRock.ogg", "CrazyDream.ogg", 
+                "CurveBall.ogg", "CyanTone.ogg", "Cygnus.ogg", "DancinFool.ogg", "Dione.ogg", 
+                "DonMessWivit.ogg", "Draco.ogg", "DreamTheme.ogg", "Eastern_Sky.ogg", "Enter_the_Nexus.ogg", 
+                "Eridani.ogg", "EtherShake.ogg", "FreeFlight.ogg", "FriendlyGhost.ogg", "Funk_Yall.ogg", 
+                "GameOverGuitar.ogg", "Ganymede.ogg", "Gimme_Mo_Town.ogg", "Girtab.ogg", "Glacial_Groove.ogg", 
+                "Growl.ogg", "HalfwayHome.ogg", "Highscore.ogg", "Hydra.ogg", "InsertCoin.ogg", "Kuma.ogg", 
+                "LoopyLounge.ogg", "LoveFlute.ogg", "Luna.ogg", "Lyon.ogg", "Lyra.ogg", "Machina.ogg", 
+                "MidEvilJaunt.ogg", "Nairobi.ogg", "Nassau.ogg", "NewPlayer.ogg", "No_Limits.ogg", 
+                "Noises2.ogg", "Noises3.ogg", "Oberon.ogg", "OrgandUb.ogg", "Orion.ogg", "Paradise_Island.ogg", 
+                "Pegasus.ogg", "Perseus.ogg", "Phobos.ogg", "Playa.ogg", "PyxisMaterial.ogg", "Rasalas.ogg", 
+                "Revelation.ogg", "Rigel.ogg", "Ring_Classic_02.ogg", "Ring_Digital_02.ogg", "Ring_Synth_02.ogg", 
+                "Ring_Synth_04.ogg", "Road_Trip.ogg", "Rockin.ogg", "RomancingTheTone.ogg", "Safari.ogg", 
+                "Savannah.ogg", "Scarabaeus.ogg", "Sceptrum.ogg", "Sedna.ogg", "Seville.ogg", "Shes_All_That.ogg", 
+                "SilkyWay.ogg", "SitarVSSitar.ogg", "Solarium.ogg", "SpringyJalopy.ogg", "Steppin_Out.ogg", 
+                "Terminated.ogg", "Testudo.ogg", "Themos.ogg", "Third_Eye.ogg", "Thunderfoot.ogg", 
+                "Titania.ogg", "Triton.ogg", "TwirlAway.ogg", "Umbriel.ogg", "UrsaMinor.ogg", "VeryAlarmed.ogg", 
+                "Vespa.ogg", "World.ogg", "Yukaay.ogg", "Zeta.ogg"
+            ],
+            ui: [
+                "Dock.ogg", "Effect_Tick.ogg", "KeypressDelete.ogg", "KeypressInvalid.ogg", 
+                "KeypressReturn.ogg", "KeypressSpacebar.ogg", "KeypressStandard.ogg", "Lock.ogg", 
+                "LowBattery.ogg", "Trusted.ogg", "Undock.ogg", "Unlock.ogg", "VideoRecord.ogg", 
+                "VideoStop.ogg", "WirelessChargingStarted.ogg"
+            ]
+        };
+
+        let currentCategory = 'alarms';
+        let activeAudio = null;
+        let activeBtn = null;
+
+        const tabButtons = document.querySelectorAll('.tab');
+        const soundContainer = document.getElementById('sound-container');
+        const settingsTrigger = document.getElementById('settings-trigger');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const themeSelect = document.getElementById('theme-select');
+
+        function init() {
+            renderSounds(currentCategory);
+        }
+
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentCategory = e.target.getAttribute('data-target');
+                renderSounds(currentCategory);
+            });
+        });
+
+        function renderSounds(category) {
+            soundContainer.innerHTML = '';
+            soundsData[category].forEach((soundName, index) => {
+                const name = typeof soundName === 'object' ? soundName.name : soundName;
+                const fileUrl = typeof soundName === 'object' ? soundName.file : '';
+
+                const card = document.createElement('div');
+                card.className = 'sound-card';
+                card.innerHTML = `
+                    <div class="sound-title">${name}</div>
+                    <div class="card-actions">
+                        <button class="action-btn play" onclick="togglePlay('${category}', ${index}, this)">
+                            ▶ Play
+                        </button>
+                        <a href="${fileUrl}" download="${name}" class="action-btn download" onclick="handleDownload(event, '${fileUrl}')">
+                            ⬇ Download
+                        </a>
+                    </div>
+                `;
+                soundContainer.appendChild(card);
+            });
+        }
+
+        window.togglePlay = function(category, index, btn) {
+            if (activeAudio && activeBtn === btn) {
+                activeAudio.pause();
+                activeAudio = null;
+                btn.innerHTML = `▶ Play`;
+                activeBtn = null;
+                return;
+            }
+
+            if (activeAudio) {
+                activeAudio.pause();
+                if (activeBtn) activeBtn.innerHTML = `▶ Play`;
+            }
+
+            const soundObj = soundsData[category][index];
+            const fileUrl = typeof soundObj === 'object' ? soundObj.file : '';
+
+            if (fileUrl) {
+                activeAudio = new Audio(fileUrl);
+                activeAudio.play();
+                btn.innerHTML = `⏹ Stop`;
+                activeBtn = btn;
+                activeAudio.onended = () => {
+                    btn.innerHTML = `▶ Play`;
+                    activeBtn = null;
+                };
+            } else {
+                alert((typeof soundObj === 'string' ? soundObj : soundObj.name) + " has no audio file attached yet! Upload it using the top right button.");
+            }
+        }
+
+        window.handleDownload = function(event, url) {
+            if (!url) {
+                event.preventDefault();
+                alert("No file uploaded for this sound yet!");
+            }
+        }
+
+        settingsTrigger.addEventListener('click', () => settingsModal.classList.add('open'));
+        closeModalBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
+
+        themeSelect.addEventListener('change', (e) => {
+            document.documentElement.setAttribute('data-theme', e.target.value);
+        });
+
+        document.getElementById('audio-file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                soundsData[currentCategory].unshift({
+                    name: file.name,
+                    file: fileURL
+                });
+                renderSounds(currentCategory);
+                alert("Sound uploaded successfully!");
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>
