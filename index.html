@@ -69,7 +69,7 @@
             align-items: center;
         }
 
-        .settings-btn, .upload-btn {
+        .settings-btn {
             background: none;
             border: 1px solid var(--card-border);
             color: var(--text-color);
@@ -83,7 +83,7 @@
             font-weight: 500;
         }
 
-        .settings-btn:hover, .upload-btn:hover {
+        .settings-btn:hover {
             border-color: var(--primary);
             background-color: rgba(26, 115, 232, 0.04);
         }
@@ -280,10 +280,6 @@
             cursor: pointer;
             font-weight: 600;
         }
-
-        #audio-file-input {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -291,8 +287,6 @@
     <header>
         <div class="logo">AOSPSounds</div>
         <div class="header-right">
-            <input type="file" id="audio-file-input" accept="audio/*">
-            <button class="upload-btn" id="upload-btn" onclick="document.getElementById('audio-file-input').click()">📤 Upload</button>
             <button class="settings-btn" id="settings-trigger">⚙️ Settings</button>
         </div>
     </header>
@@ -411,19 +405,19 @@
 
         function renderSounds(category) {
             soundContainer.innerHTML = '';
-            soundsData[category].forEach((soundName, index) => {
-                const name = typeof soundName === 'object' ? soundName.name : soundName;
-                const fileUrl = typeof soundName === 'object' ? soundName.file : '';
+            soundsData[category].forEach((fileName) => {
+                // Doğrudan aynı dizinden (klasörsüz) okuyor
+                const fileUrl = fileName;
 
                 const card = document.createElement('div');
                 card.className = 'sound-card';
                 card.innerHTML = `
-                    <div class="sound-title">${name}</div>
+                    <div class="sound-title">${fileName}</div>
                     <div class="card-actions">
-                        <button class="action-btn play" onclick="togglePlay('${category}', ${index}, this)">
+                        <button class="action-btn play" onclick="togglePlay('${fileUrl}', this)">
                             ▶ Play
                         </button>
-                        <a href="${fileUrl}" download="${name}" class="action-btn download" onclick="handleDownload(event, '${fileUrl}')">
+                        <a href="${fileUrl}" download="${fileName}" class="action-btn download">
                             ⬇ Download
                         </a>
                     </div>
@@ -432,7 +426,7 @@
             });
         }
 
-        window.togglePlay = function(category, index, btn) {
+        window.togglePlay = function(fileUrl, btn) {
             if (activeAudio && activeBtn === btn) {
                 activeAudio.pause();
                 activeAudio = null;
@@ -446,28 +440,18 @@
                 if (activeBtn) activeBtn.innerHTML = `▶ Play`;
             }
 
-            const soundObj = soundsData[category][index];
-            const fileUrl = typeof soundObj === 'object' ? soundObj.file : '';
-
-            if (fileUrl) {
-                activeAudio = new Audio(fileUrl);
-                activeAudio.play();
-                btn.innerHTML = `⏹ Stop`;
-                activeBtn = btn;
-                activeAudio.onended = () => {
-                    btn.innerHTML = `▶ Play`;
-                    activeBtn = null;
-                };
-            } else {
-                alert((typeof soundObj === 'string' ? soundObj : soundObj.name) + " has no audio file attached yet! Upload it using the top right button.");
-            }
-        }
-
-        window.handleDownload = function(event, url) {
-            if (!url) {
-                event.preventDefault();
-                alert("No file uploaded for this sound yet!");
-            }
+            activeAudio = new Audio(fileUrl);
+            activeAudio.play().catch(() => {
+                alert("Audio file could not be played or found! Make sure the file is in the same folder as index.html.");
+            });
+            
+            btn.innerHTML = `⏹ Stop`;
+            activeBtn = btn;
+            
+            activeAudio.onended = () => {
+                btn.innerHTML = `▶ Play`;
+                activeBtn = null;
+            };
         }
 
         settingsTrigger.addEventListener('click', () => settingsModal.classList.add('open'));
@@ -475,19 +459,6 @@
 
         themeSelect.addEventListener('change', (e) => {
             document.documentElement.setAttribute('data-theme', e.target.value);
-        });
-
-        document.getElementById('audio-file-input').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const fileURL = URL.createObjectURL(file);
-                soundsData[currentCategory].unshift({
-                    name: file.name,
-                    file: fileURL
-                });
-                renderSounds(currentCategory);
-                alert("Sound uploaded successfully!");
-            }
         });
 
         init();
